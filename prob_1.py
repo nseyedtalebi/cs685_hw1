@@ -22,3 +22,19 @@ so = snap.LoadEdgeList(snap.PNGraph,"stackoverflow-Java.txt")
 #2.1
 so_wcc = snap.TCnComV()
 snap.GetWccs(so,so_wcc)
+print(f'# of connected components: {len(so_wcc)}')
+#2.2
+so_mx_wcc = snap.GetMxWcc(so)
+snap.PrintInfo(so_mx_wcc,"Largest connected component of StackOverflow-Java")
+#2.3
+so_pr = snap.TIntFlt64H()
+snap.GetPageRank(so,so_pr)
+so_pr.SortByDat(False)#Ascending=False
+so_pr_ordered = []
+so_pr_iter = so_pr.BegI()
+while not so_pr_iter.IsEnd():
+	so_pr_ordered.append((so_pr_iter.GetKey(),so_pr_iter.GetDat(),))
+	so_pr_iter.Next()
+print("Top 3 nodes by PageRank (nodeId,PageRank):")
+for kv_pair in so_pr_ordered[0:3]:
+	print(kv_pair)
