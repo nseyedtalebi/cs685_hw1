@@ -30,6 +30,8 @@ snap.PrintInfo(so_mx_wcc,"Largest connected component of StackOverflow-Java")
 so_pr = snap.TIntFlt64H()
 snap.GetPageRank(so,so_pr)
 so_pr.SortByDat(False)#Ascending=False
+#The code below might be a naive way to do it 
+#Mb try GetKeyV() for hashtable types then just grab top 3 elements
 so_pr_ordered = []
 so_pr_iter = so_pr.BegI()
 while not so_pr_iter.IsEnd():
@@ -38,3 +40,17 @@ while not so_pr_iter.IsEnd():
 print("Top 3 nodes by PageRank (nodeId,PageRank):")
 for kv_pair in so_pr_ordered[0:3]:
 	print(kv_pair)
+#3
+#Closeness, and degree centrality take single nodes as input
+#Betweenness,Eigenvector and Page rank take a whole graph and return a hashtable
+seed = snap.TRnd(1988)
+exponent=3
+n=400
+g_rnd = snap.GenRndPowerLaw(n,exponent)
+def degree_centrality_all_desc(g):
+	centralities = snap.TIntFlt64H()
+	for node in g.Nodes():
+		centralities[node] = snap.GetDegreeCentr(g,int(node))
+	return centralities.SortByDat(False)
+c = degree_centrality_all_desc(g_rnd)
+print(c)
