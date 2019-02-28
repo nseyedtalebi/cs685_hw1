@@ -1,4 +1,6 @@
 import snap
+from math import floor
+from itertools import islice
 #Problem 1
 g = snap.LoadEdgeList(snap.PNGraph,"p2p-Gnutella08.txt",0,1)
 #1.a-e
@@ -43,6 +45,7 @@ for kv_pair in so_pr_ordered[0:3]:
 #3
 #Closeness, and degree centrality take single nodes as input
 #Betweenness,Eigenvector and Page rank take a whole graph and return a hashtable
+#top5% only
 seed = snap.TRnd(1988)
 exponent=3
 n=400
@@ -51,7 +54,6 @@ def all_node_centrality(g,centralityFunc):
     centralities = snap.TIntFlt64H()
     for node in g.Nodes():
         centralities[node.GetId()] = centralityFunc(g,node.GetId())
-    centralities.SortByDat(False)
     return centralities
 
 def iter_kv_pairs(hasht):
@@ -60,11 +62,17 @@ def iter_kv_pairs(hasht):
         yield it.GetKey(),it.GetDat()
         it.Next()
 
+def build_color_map(hasht,color_name,pct=0.05):
+    hasht.SortByDat(False)#sort descending
+    keyV = snap.TInt64V()
+    num_to_take = floor(hasht.Len()*pct)
+    cmap = snap.TIntStrH()
+    #islice slices a generator like an array
+    for key,val in islice(iter_kv_pairs(hasht),num_to_take):
+        cmap[key] = color_name
+    return cmap
+
+#draw the graph
+#snap.DrawGViz(g_rnd,snap.gvlNeato,"rnd_test.png","Random Network")
 deg_centr = all_node_centrality(g_rnd,snap.GetDegreeCentr)
 close_centr = all_node_centrality(g_rnd,snap.GetClosenessCentr)
-for k,v in iter_kv_pairs(deg_centr):
-    print(k,v)
-for k,v in iter_kv_pairs(close_centr):
-    print(k,v)
-
-
