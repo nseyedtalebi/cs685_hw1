@@ -5,8 +5,8 @@ g = snap.LoadEdgeList(snap.PNGraph,"p2p-Gnutella08.txt",0,1)
 info_filename = "gnutella_info.txt"
 snap.PrintInfo(g,'Gnutella P2P network 2008',info_filename,False)
 with open(info_filename,'r') as inf:
-	for line in inf:
-		print(line)
+    for line in inf:
+        print(line)
 #Below addresses 1.f,g
 g_outdeg = snap.TFltPr64V()
 g_indeg = snap.TFltPr64V()
@@ -35,11 +35,11 @@ so_pr.SortByDat(False)#Ascending=False
 so_pr_ordered = []
 so_pr_iter = so_pr.BegI()
 while not so_pr_iter.IsEnd():
-	so_pr_ordered.append((so_pr_iter.GetKey(),so_pr_iter.GetDat(),))
-	so_pr_iter.Next()
+    so_pr_ordered.append((so_pr_iter.GetKey(),so_pr_iter.GetDat(),))
+    so_pr_iter.Next()
 print("Top 3 nodes by PageRank (nodeId,PageRank):")
 for kv_pair in so_pr_ordered[0:3]:
-	print(kv_pair)
+    print(kv_pair)
 #3
 #Closeness, and degree centrality take single nodes as input
 #Betweenness,Eigenvector and Page rank take a whole graph and return a hashtable
@@ -47,10 +47,24 @@ seed = snap.TRnd(1988)
 exponent=3
 n=400
 g_rnd = snap.GenRndPowerLaw(n,exponent)
-def degree_centrality_all_desc(g):
-	centralities = snap.TIntFlt64H()
-	for node in g.Nodes():
-		centralities[node] = snap.GetDegreeCentr(g,int(node))
-	return centralities.SortByDat(False)
-c = degree_centrality_all_desc(g_rnd)
-print(c)
+def all_node_centrality(g,centralityFunc):
+    centralities = snap.TIntFlt64H()
+    for node in g.Nodes():
+        centralities[node.GetId()] = centralityFunc(g,node.GetId())
+    centralities.SortByDat(False)
+    return centralities
+
+def iter_kv_pairs(hasht):
+    it = hasht.BegI()
+    while not it.IsEnd():
+        yield it.GetKey(),it.GetDat()
+        it.Next()
+
+deg_centr = all_node_centrality(g_rnd,snap.GetDegreeCentr)
+close_centr = all_node_centrality(g_rnd,snap.GetClosenessCentr)
+for k,v in iter_kv_pairs(deg_centr):
+    print(k,v)
+for k,v in iter_kv_pairs(close_centr):
+    print(k,v)
+
+
