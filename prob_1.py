@@ -105,4 +105,4 @@ for k,v in centralities.items():
         combined_cmap[node_id] = node_color
     snap.DrawGViz(g_rnd,snap.gvlNeato,f'{k}_centrality.png',f'{k} Centrality, Top {pct}% in {color}',True,cmap)
 snap.DrawGViz(g_rnd,snap.gvlNeato,f'Various_centralities.png',
-    f'Centralities, Top {pct}% nodes:\n'+ f'{generate_legend(legend)}',True,cmap)
+    f'Centralities, Top {pct}% nodes:\n'+ f'{generate_legend(legend)}',True,combined_cmap)
