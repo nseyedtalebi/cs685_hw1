@@ -1,6 +1,6 @@
 import snap
 from math import floor
-from itertools import islice
+from itertools import islice,cycle
 #Problem 1
 g = snap.LoadEdgeList(snap.PNGraph,"p2p-Gnutella08.txt",0,1)
 #1.a-e
@@ -66,13 +66,43 @@ def build_color_map(hasht,color_name,pct=0.05):
     hasht.SortByDat(False)#sort descending
     keyV = snap.TInt64V()
     num_to_take = floor(hasht.Len()*pct)
-    cmap = snap.TIntStrH()
+    cmap = snap.TIntStr64H()
     #islice slices a generator like an array
     for key,val in islice(iter_kv_pairs(hasht),num_to_take):
         cmap[key] = color_name
     return cmap
 
+def generate_legend(legend):
+    return '\n'.join((f'{centr} : {color}' for centr,color in legend.items()))
+
 #draw the graph
 #snap.DrawGViz(g_rnd,snap.gvlNeato,"rnd_test.png","Random Network")
 deg_centr = all_node_centrality(g_rnd,snap.GetDegreeCentr)
 close_centr = all_node_centrality(g_rnd,snap.GetClosenessCentr)
+nodes_betwn_centr = snap.TIntFlt64H()
+edges_betwn_centr = snap.TIntPrFlt64H()
+snap.GetBetweennessCentr(g_rnd,nodes_betwn_centr,edges_betwn_centr)
+eigen_centr = snap.TIntFlt64H()
+snap.GetEigenVectorCentr(g_rnd,eigen_centr)
+pr_centr = snap.TIntFlt64H()
+snap.GetPageRank(g_rnd,pr_centr)
+centralities = {
+    'degree':deg_centr, 
+    'closeness':close_centr,
+    'betweenness':nodes_betwn_centr,
+    'eigenvector':eigen_centr,
+    'pagerank':pr_centr
+}
+color_names = cycle(('red','green','purple','blue','orange'))
+pct = 0.05
+combined_cmap = snap.TIntStr64H()
+legend = {}
+for k,v in centralities.items():
+    color = next(color_names)
+    legend[k] = color
+    cmap = build_color_map(v,color,pct)
+    for node_id,node_color in iter_kv_pairs(cmap):
+        combined_cmap[node_id] = node_color
+    snap.DrawGViz(g_rnd,snap.gvlNeato,f'{k}_centrality.png',f'{k} Centrality, Top {pct}% in {color}',True,cmap)
+snap.DrawGViz(g_rnd,snap.gvlNeato,f'Various_centralities.png',
+    f'Centralities, Top {pct}% nodes:\n'+ f'{generate_legend(legend)}',True,cmap)
